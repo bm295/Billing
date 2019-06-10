@@ -80,7 +80,7 @@ namespace CatFactory.SqlServer.Tests
         }
 
         // todo: Fix this test
-        //[Fact]
+        [Fact]
         public void TestMockingPeopleFromAnonymous()
         {
             var mocker = EntityMocker.Create(new

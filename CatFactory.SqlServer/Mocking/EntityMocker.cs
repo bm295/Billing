@@ -146,13 +146,13 @@ namespace CatFactory.SqlServer.Mocking
                 {
                     var parentProperty = mockType.GetProperty(parentSetting.Name);
 
-                    if (parentSetting.DateTimeFunc != null)
+                    if (parentSetting.DateTimeFunc != null && parentProperty.CanWrite)
                     {
                         parentProperty.SetValue(mock, parentSetting.DateTimeFunc());
                         continue;
                     }
 
-                    if (parentSetting.Int32Func != null)
+                    if (parentSetting.Int32Func != null && parentProperty.CanWrite)
                     {
                         parentProperty.SetValue(mock, parentSetting.Int32Func());
                         continue;
@@ -164,7 +164,10 @@ namespace CatFactory.SqlServer.Mocking
 
                         var value = parentSetting.Values.ElementAt(index);
 
-                        parentProperty.SetValue(mock, value);
+                        if (parentProperty.CanWrite)
+                        {
+                            parentProperty.SetValue(mock, value);
+                        }                        
 
                         foreach (var childSetting in EntitySettings.Where(x => x.When == value))
                         {
@@ -174,7 +177,10 @@ namespace CatFactory.SqlServer.Mocking
 
                             var childValue = childSetting.Values.ElementAt(childIndex);
 
-                            chilProperty.SetValue(mock, childValue);
+                            if (chilProperty.CanWrite)
+                            {
+                                chilProperty.SetValue(mock, childValue);
+                            }                            
                         }
                     }
                 }
