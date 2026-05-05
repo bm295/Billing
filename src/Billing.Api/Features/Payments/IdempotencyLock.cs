@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 
-namespace Billing.Api.Services;
+namespace Billing.Api.Features.Payments;
 
 public sealed class IdempotencyLock : IIdempotencyLock
 {

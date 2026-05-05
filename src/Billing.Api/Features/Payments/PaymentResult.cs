@@ -1,6 +1,6 @@
 using Billing.Api.Domain;
 
-namespace Billing.Api.Services;
+namespace Billing.Api.Features.Payments;
 
 public sealed record PaymentResult(
     PaymentOutcome Outcome,

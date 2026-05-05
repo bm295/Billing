@@ -1,4 +1,4 @@
-namespace Billing.Api.Services;
+namespace Billing.Api.Features.Invoices;
 
 public interface IInvoiceService
 {

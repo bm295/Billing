@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 
-namespace Billing.Api.Services;
+namespace Billing.Api.Features.Invoices;
 
 public sealed class InvoiceGenerationLock : IInvoiceGenerationLock
 {

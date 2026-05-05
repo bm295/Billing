@@ -1,6 +1,4 @@
-using Billing.Api.Contracts;
-
-namespace Billing.Api.Services;
+namespace Billing.Api.Features.Payments;
 
 public interface IPaymentService
 {

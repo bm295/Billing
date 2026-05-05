@@ -1,9 +1,9 @@
-using Billing.Api.Contracts;
 using Billing.Api.Data;
 using Billing.Api.Domain;
+using Billing.Api.Features.Common;
 using Microsoft.EntityFrameworkCore;
 
-namespace Billing.Api.Endpoints;
+namespace Billing.Api.Features.Subscriptions;
 
 public static class SubscriptionEndpoints
 {

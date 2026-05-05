@@ -1,8 +1,11 @@
 using System.Net;
 using System.Net.Http.Json;
-using Billing.Api.Contracts;
 using Billing.Api.Data;
 using Billing.Api.Domain;
+using Billing.Api.Features.Common;
+using Billing.Api.Features.Invoices;
+using Billing.Api.Features.Payments;
+using Billing.Api.Features.Subscriptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 

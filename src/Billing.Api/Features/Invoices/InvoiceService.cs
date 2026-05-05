@@ -2,7 +2,7 @@ using Billing.Api.Data;
 using Billing.Api.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace Billing.Api.Services;
+namespace Billing.Api.Features.Invoices;
 
 public sealed class InvoiceService(
     BillingDbContext db,

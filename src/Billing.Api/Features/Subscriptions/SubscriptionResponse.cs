@@ -1,6 +1,6 @@
 using Billing.Api.Domain;
 
-namespace Billing.Api.Contracts;
+namespace Billing.Api.Features.Subscriptions;
 
 public sealed record SubscriptionResponse(
     Guid Id,

@@ -1,8 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
-using Billing.Api.Contracts;
 using Billing.Api.Data;
 using Billing.Api.Domain;
+using Billing.Api.Features.Common;
+using Billing.Api.Features.Subscriptions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;

@@ -1,4 +1,4 @@
-namespace Billing.Api.Services;
+namespace Billing.Api.Features.Payments;
 
 public enum PaymentOutcome
 {

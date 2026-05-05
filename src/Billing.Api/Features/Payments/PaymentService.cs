@@ -1,11 +1,10 @@
 using System.Security.Cryptography;
 using System.Text;
-using Billing.Api.Contracts;
 using Billing.Api.Data;
 using Billing.Api.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace Billing.Api.Services;
+namespace Billing.Api.Features.Payments;
 
 public sealed class PaymentService(
     BillingDbContext db,

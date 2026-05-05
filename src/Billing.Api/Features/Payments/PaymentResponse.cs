@@ -1,6 +1,6 @@
 using Billing.Api.Domain;
 
-namespace Billing.Api.Contracts;
+namespace Billing.Api.Features.Payments;
 
 public sealed record PaymentResponse(
     Guid Id,

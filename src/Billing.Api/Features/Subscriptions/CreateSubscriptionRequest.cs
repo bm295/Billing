@@ -1,4 +1,4 @@
-namespace Billing.Api.Contracts;
+namespace Billing.Api.Features.Subscriptions;
 
 public sealed record CreateSubscriptionRequest(
     Guid CustomerId,

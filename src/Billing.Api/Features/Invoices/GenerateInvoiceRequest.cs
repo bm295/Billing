@@ -1,3 +1,3 @@
-namespace Billing.Api.Contracts;
+namespace Billing.Api.Features.Invoices;
 
 public sealed record GenerateInvoiceRequest(Guid SubscriptionId);

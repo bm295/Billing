@@ -1,6 +1,7 @@
 using Billing.Api.Data;
-using Billing.Api.Endpoints;
-using Billing.Api.Services;
+using Billing.Api.Features.Invoices;
+using Billing.Api.Features.Payments;
+using Billing.Api.Features.Subscriptions;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

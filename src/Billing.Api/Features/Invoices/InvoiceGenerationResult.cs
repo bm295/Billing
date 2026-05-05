@@ -1,6 +1,6 @@
 using Billing.Api.Domain;
 
-namespace Billing.Api.Services;
+namespace Billing.Api.Features.Invoices;
 
 public sealed record InvoiceGenerationResult(
     InvoiceGenerationOutcome Outcome,

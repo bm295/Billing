@@ -1,8 +1,8 @@
-using Billing.Api.Contracts;
-using Billing.Api.Services;
+using Billing.Api.Features.Common;
+using Billing.Api.Features.Payments;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Billing.Api.Endpoints;
+namespace Billing.Api.Features.Invoices;
 
 public static class InvoiceEndpoints
 {
