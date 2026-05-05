@@ -10,4 +10,9 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Billing.Application\Billing.Application.csproj" />
+    <ProjectReference Include="..\Billing.Infrastructure\Billing.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>
