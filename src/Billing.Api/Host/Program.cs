@@ -15,7 +15,10 @@ builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddDbContext<BillingDbContext>(options =>
 {
-    options.UseInMemoryDatabase("Billing");
+    var connectionString = builder.Configuration.GetConnectionString("BillingDb")
+        ?? throw new InvalidOperationException("Connection string 'BillingDb' is not configured.");
+
+    options.UseSqlServer(connectionString);
 });
 
 var app = builder.Build();
