@@ -4,9 +4,9 @@ This checklist breaks the remaining work into small, clear, implementation-ready
 
 ## 1. Production Data Storage
 
-- [ ] Replace the in-memory database registration in `src/Billing.Api/Host/Program.cs` with a SQL Server registration that reads `ConnectionStrings:BillingDb` from configuration.
-- [ ] Add a `ConnectionStrings` section with a `BillingDb` placeholder to `src/Billing.Api/appsettings.json`.
-- [ ] Create an EF Core migration named `InitialBillingSchema` for the existing `BillingDbContext` model.
+- [x] Replace the in-memory database registration in `src/Billing.Api/Host/Program.cs` with a SQL Server registration that reads `ConnectionStrings:BillingDb` from configuration.
+- [x] Add a `ConnectionStrings` section with a `BillingDb` placeholder to `src/Billing.Api/appsettings.json`.
+- [x] Create an EF Core migration named `InitialBillingSchema` for the existing `BillingDbContext` model.
 - [ ] Add startup validation class `BillingDatabaseOptionsValidator` to fail fast when the production connection string is missing.
 - [ ] Create a deployment runbook section that explains how to run database migrations before deploying the API.
 
