@@ -7,21 +7,21 @@ This checklist breaks the remaining work into small, clear, implementation-ready
 - [x] Replace the in-memory database registration in `src/Billing.Api/Host/Program.cs` with a SQL Server registration that reads `ConnectionStrings:BillingDb` from configuration.
 - [x] Add a `ConnectionStrings` section with a `BillingDb` placeholder to `src/Billing.Api/appsettings.json`.
 - [x] Create an EF Core migration named `InitialBillingSchema` for the existing `BillingDbContext` model.
-- [ ] Add startup validation class `BillingDatabaseOptionsValidator` to fail fast when the production connection string is missing.
-- [ ] Create a deployment runbook section that explains how to run database migrations before deploying the API.
+- [x] Add startup validation class `BillingDatabaseOptionsValidator` to fail fast when the production connection string is missing.
+- [x] Create a deployment runbook section that explains how to run database migrations before deploying the API.
 
 ## 2. Customer Management
 
-- [ ] Create request class `CreateCustomerRequest` with fields `Email`, `CompanyName`, `BillingAddress`, and `PaymentMethodId`.
-- [ ] Create response class `CustomerResponse` with fields `Id`, `Email`, `CompanyName`, `BillingAddress`, `PaymentMethodId`, `Status`, and `CreatedAt`.
-- [ ] Create interface `ICustomerService` with methods `CreateCustomerAsync`, `GetCustomerAsync`, and `ListCustomersAsync`.
-- [ ] Create class `CustomerService` that validates unique customer email addresses before inserting a customer.
-- [ ] Create endpoint class `CustomerEndpoints` with routes `POST /customers`, `GET /customers/{customerId}`, and `GET /customers`.
-- [ ] Add tests in `CustomerEndpointTests` for creating, fetching, listing, and rejecting duplicate customer emails.
+- [x] Create request class `CreateCustomerRequest` with fields `Email`, `CompanyName`, `BillingAddress`, and `PaymentMethodId`.
+- [x] Create response class `CustomerResponse` with fields `Id`, `Email`, `CompanyName`, `BillingAddress`, `PaymentMethodId`, `Status`, and `CreatedAt`.
+- [x] Create interface `ICustomerService` with methods `CreateCustomerAsync`, `GetCustomerAsync`, and `ListCustomersAsync`.
+- [x] Create class `CustomerService` that validates unique customer email addresses before inserting a customer.
+- [x] Create endpoint class `CustomerEndpoints` with routes `POST /customers`, `GET /customers/{customerId}`, and `GET /customers`.
+- [x] Add tests in `CustomerEndpointTests` for creating, fetching, listing, and rejecting duplicate customer emails.
 
 ## 3. Product and Price Plan Management
 
-- [ ] Create request class `CreateProductRequest` with fields `Name`, `Description`, and `Active`.
+- [x] Create request class `CreateProductRequest` with fields `Name`, `Description`, and `Active`.
 - [ ] Create request class `CreatePricePlanRequest` with fields `ProductId`, `BillingType`, `Amount`, `Currency`, `BillingInterval`, and `UsageUnit`.
 - [ ] Create response classes `ProductResponse` and `PricePlanResponse` for API output.
 - [ ] Create interface `ICatalogService` for product and plan operations.
