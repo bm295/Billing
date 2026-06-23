@@ -114,6 +114,7 @@ partial class BillingDbContextModelSnapshot : ModelSnapshot
         modelBuilder.Entity("Billing.Domain.PricePlan", b =>
         {
             b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
+            b.Property<bool>("Active").HasColumnType("bit");
             b.Property<decimal>("Amount").HasPrecision(18, 2).HasColumnType("decimal(18,2)");
             b.Property<string>("BillingInterval").IsRequired().HasMaxLength(20).HasColumnType("nvarchar(20)");
             b.Property<string>("BillingType").IsRequired().HasMaxLength(50).HasColumnType("nvarchar(50)");

@@ -17,4 +17,6 @@ public sealed class PricePlan
     public required string BillingInterval { get; set; }
 
     public string? UsageUnit { get; set; }
+
+    public bool Active { get; set; }
 }

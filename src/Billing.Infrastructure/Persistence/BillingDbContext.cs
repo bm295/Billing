@@ -50,6 +50,7 @@ public sealed class BillingDbContext(DbContextOptions<BillingDbContext> options)
             entity.Property(plan => plan.Currency).HasMaxLength(3).IsRequired();
             entity.Property(plan => plan.BillingInterval).HasMaxLength(20).IsRequired();
             entity.Property(plan => plan.UsageUnit).HasMaxLength(100);
+            entity.Property(plan => plan.Active).IsRequired();
 
             entity.HasOne(plan => plan.Product)
                 .WithMany()

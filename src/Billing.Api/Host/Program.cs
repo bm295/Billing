@@ -1,4 +1,5 @@
 using Billing.Api.Options;
+using Billing.Application.Catalog;
 using Billing.Application.Customers;
 using Billing.Infrastructure.Persistence;
 using Billing.Infrastructure.Payments;
@@ -14,6 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<IKeyedLock, IdempotencyLock>();
+builder.Services.AddScoped<ICatalogService, CatalogService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
@@ -43,6 +45,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.MapGet("/", () => Results.Ok(new { service = "Billing API" }));
+app.MapCatalogEndpoints();
 app.MapCustomerEndpoints();
 app.MapSubscriptionEndpoints();
 app.MapInvoiceEndpoints();
