@@ -22,11 +22,11 @@ This checklist breaks the remaining work into small, clear, implementation-ready
 ## 3. Product and Price Plan Management
 
 - [x] Create request class `CreateProductRequest` with fields `Name`, `Description`, and `Active`.
-- [ ] Create request class `CreatePricePlanRequest` with fields `ProductId`, `BillingType`, `Amount`, `Currency`, `BillingInterval`, and `UsageUnit`.
-- [ ] Create response classes `ProductResponse` and `PricePlanResponse` for API output.
-- [ ] Create interface `ICatalogService` for product and plan operations.
-- [ ] Create class `CatalogService` to create, update, deactivate, and list products and price plans.
-- [ ] Create endpoint class `CatalogEndpoints` with routes for products and price plans under `/catalog`.
+- [x] Create request class `CreatePricePlanRequest` with fields `ProductId`, `BillingType`, `Amount`, `Currency`, `BillingInterval`, and `UsageUnit`.
+- [x] Create response classes `ProductResponse` and `PricePlanResponse` for API output.
+- [x] Create interface `ICatalogService` for product and plan operations.
+- [x] Create class `CatalogService` to create, update, deactivate, and list products and price plans.
+- [x] Create endpoint class `CatalogEndpoints` with routes for products and price plans under `/catalog`.
 - [ ] Add validation that `Currency` is a three-letter ISO code and `Amount` is not negative.
 - [ ] Add tests in `CatalogEndpointTests` for active products, inactive products, recurring plans, and usage-based plans.
 

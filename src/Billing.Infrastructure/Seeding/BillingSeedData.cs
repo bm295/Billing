@@ -45,7 +45,8 @@ public static class BillingSeedData
             Amount = 49m,
             Currency = "USD",
             BillingInterval = BillingIntervals.Month,
-            UsageUnit = "API_CALL"
+            UsageUnit = "API_CALL",
+            Active = true
         });
 
         await db.SaveChangesAsync(cancellationToken);

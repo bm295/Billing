@@ -38,7 +38,9 @@ public static class SubscriptionEndpoints
         }
 
         var pricePlan = await db.PricePlans
-            .SingleOrDefaultAsync(plan => plan.Id == request.PricePlanId, cancellationToken);
+            .SingleOrDefaultAsync(
+                plan => plan.Id == request.PricePlanId && plan.Active,
+                cancellationToken);
 
         if (pricePlan is null)
         {
