@@ -152,6 +152,24 @@ partial class BillingDbContextModelSnapshot : ModelSnapshot
             b.ToTable("Subscriptions");
         });
 
+        modelBuilder.Entity("Billing.Domain.UsageRecord", b =>
+        {
+            b.Property<Guid>("Id").ValueGeneratedOnAdd().HasColumnType("uniqueidentifier");
+            b.Property<Guid>("CustomerId").HasColumnType("uniqueidentifier");
+            b.Property<string>("IdempotencyKey").IsRequired().HasMaxLength(200).HasColumnType("nvarchar(200)");
+            b.Property<string>("MetricName").IsRequired().HasMaxLength(100).HasColumnType("nvarchar(100)");
+            b.Property<decimal>("Quantity").HasPrecision(18, 4).HasColumnType("decimal(18,4)");
+            b.Property<Guid>("SubscriptionId").HasColumnType("uniqueidentifier");
+            b.Property<DateTimeOffset>("Timestamp").HasColumnType("datetimeoffset");
+            b.HasKey("Id");
+            b.HasIndex("CustomerId");
+            b.HasIndex("IdempotencyKey").IsUnique();
+            b.HasIndex("SubscriptionId");
+            b.HasIndex("Timestamp");
+            b.ToTable("UsageRecords");
+        });
+
+
         modelBuilder.Entity("Billing.Domain.Invoice", b =>
         {
             b.HasOne("Billing.Domain.Customer", "Customer").WithMany().HasForeignKey("CustomerId").OnDelete(DeleteBehavior.Cascade).IsRequired();
@@ -191,6 +209,15 @@ partial class BillingDbContextModelSnapshot : ModelSnapshot
             b.Navigation("Customer");
             b.Navigation("PricePlan");
         });
+
+        modelBuilder.Entity("Billing.Domain.UsageRecord", b =>
+        {
+            b.HasOne("Billing.Domain.Customer", "Customer").WithMany().HasForeignKey("CustomerId").OnDelete(DeleteBehavior.Cascade).IsRequired();
+            b.HasOne("Billing.Domain.Subscription", "Subscription").WithMany().HasForeignKey("SubscriptionId").OnDelete(DeleteBehavior.NoAction).IsRequired();
+            b.Navigation("Customer");
+            b.Navigation("Subscription");
+        });
+
 
         modelBuilder.Entity("Billing.Domain.Invoice", b => b.Navigation("Lines"));
         modelBuilder.Entity("Billing.Domain.Payment", b => b.Navigation("Attempts"));

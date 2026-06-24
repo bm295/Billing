@@ -1,10 +1,11 @@
+using System.Text.RegularExpressions;
 using Billing.Domain;
 using Billing.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace Billing.Application.Catalog;
 
-public sealed class CatalogService(BillingDbContext db) : ICatalogService
+public sealed partial class CatalogService(BillingDbContext db) : ICatalogService
 {
     public async Task<ProductResponse> CreateProductAsync(
         CreateProductRequest request,
@@ -100,8 +101,8 @@ public sealed class CatalogService(BillingDbContext db) : ICatalogService
             Id = Guid.NewGuid(),
             ProductId = request.ProductId,
             BillingType = NormalizeRequired(request.BillingType, nameof(request.BillingType)),
-            Amount = request.Amount,
-            Currency = NormalizeRequired(request.Currency, nameof(request.Currency)).ToUpperInvariant(),
+            Amount = ValidateAmount(request.Amount),
+            Currency = NormalizeCurrency(request.Currency),
             BillingInterval = NormalizeRequired(request.BillingInterval, nameof(request.BillingInterval)),
             UsageUnit = NormalizeOptional(request.UsageUnit),
             Active = true
@@ -155,8 +156,8 @@ public sealed class CatalogService(BillingDbContext db) : ICatalogService
 
         pricePlan.ProductId = request.ProductId;
         pricePlan.BillingType = NormalizeRequired(request.BillingType, nameof(request.BillingType));
-        pricePlan.Amount = request.Amount;
-        pricePlan.Currency = NormalizeRequired(request.Currency, nameof(request.Currency)).ToUpperInvariant();
+        pricePlan.Amount = ValidateAmount(request.Amount);
+        pricePlan.Currency = NormalizeCurrency(request.Currency);
         pricePlan.BillingInterval = NormalizeRequired(request.BillingInterval, nameof(request.BillingInterval));
         pricePlan.UsageUnit = NormalizeOptional(request.UsageUnit);
 
@@ -195,6 +196,30 @@ public sealed class CatalogService(BillingDbContext db) : ICatalogService
             throw new InvalidOperationException("Product does not exist or is not active.");
         }
     }
+
+    private static decimal ValidateAmount(decimal amount)
+    {
+        if (amount < 0m)
+        {
+            throw new ArgumentException("Amount cannot be negative.", nameof(CreatePricePlanRequest.Amount));
+        }
+
+        return amount;
+    }
+
+    private static string NormalizeCurrency(string value)
+    {
+        var normalized = NormalizeRequired(value, nameof(CreatePricePlanRequest.Currency)).ToUpperInvariant();
+        if (!CurrencyCodeRegex().IsMatch(normalized))
+        {
+            throw new ArgumentException("Currency must be a three-letter ISO code.", nameof(CreatePricePlanRequest.Currency));
+        }
+
+        return normalized;
+    }
+
+    [GeneratedRegex("^[A-Z]{3}$")]
+    private static partial Regex CurrencyCodeRegex();
 
     private static string NormalizeRequired(string value, string parameterName)
     {

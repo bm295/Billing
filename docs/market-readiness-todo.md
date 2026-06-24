@@ -27,25 +27,25 @@ This checklist breaks the remaining work into small, clear, implementation-ready
 - [x] Create interface `ICatalogService` for product and plan operations.
 - [x] Create class `CatalogService` to create, update, deactivate, and list products and price plans.
 - [x] Create endpoint class `CatalogEndpoints` with routes for products and price plans under `/catalog`.
-- [ ] Add validation that `Currency` is a three-letter ISO code and `Amount` is not negative.
-- [ ] Add tests in `CatalogEndpointTests` for active products, inactive products, recurring plans, and usage-based plans.
+- [x] Add validation that `Currency` is a three-letter ISO code and `Amount` is not negative.
+- [x] Add tests in `CatalogEndpointTests` for active products, inactive products, recurring plans, and usage-based plans.
 
 ## 4. Usage-Based Billing
 
-- [ ] Create domain entity `UsageRecord` with fields `Id`, `CustomerId`, `SubscriptionId`, `MetricName`, `Quantity`, `Timestamp`, and `IdempotencyKey`.
-- [ ] Add `DbSet<UsageRecord>` and model configuration for indexes on `SubscriptionId`, `Timestamp`, and `IdempotencyKey`.
-- [ ] Create request class `ReportUsageRequest` with fields `SubscriptionId`, `MetricName`, `Quantity`, and `Timestamp`.
-- [ ] Create response class `UsageRecordResponse` for accepted usage records.
-- [ ] Create interface `IUsageService` with methods `ReportUsageAsync` and `GetUsageForBillingPeriodAsync`.
-- [ ] Create class `UsageService` that stores usage records idempotently by `Idempotency-Key`.
+- [x] Create domain entity `UsageRecord` with fields `Id`, `CustomerId`, `SubscriptionId`, `MetricName`, `Quantity`, `Timestamp`, and `IdempotencyKey`.
+- [x] Add `DbSet<UsageRecord>` and model configuration for indexes on `SubscriptionId`, `Timestamp`, and `IdempotencyKey`.
+- [x] Create request class `ReportUsageRequest` with fields `SubscriptionId`, `MetricName`, `Quantity`, and `Timestamp`.
+- [x] Create response class `UsageRecordResponse` for accepted usage records.
+- [x] Create interface `IUsageService` with methods `ReportUsageAsync` and `GetUsageForBillingPeriodAsync`.
+- [x] Create class `UsageService` that stores usage records idempotently by `Idempotency-Key`.
 - [ ] Create endpoint class `UsageEndpoints` with route `POST /usage`.
 - [ ] Update `InvoiceService` to include usage invoice lines for usage-based price plans.
 - [ ] Add tests in `UsageEndpointTests` for usage ingestion, duplicate idempotency keys, invalid quantities, and invoice usage totals.
 
 ## 5. Subscription Lifecycle
 
-- [ ] Extend `SubscriptionEndpoints` with `GET /subscriptions/{subscriptionId}` and `GET /customers/{customerId}/subscriptions`.
-- [ ] Create request class `CancelSubscriptionRequest` with field `CancelAtPeriodEnd`.
+- [x] Extend `SubscriptionEndpoints` with `GET /subscriptions/{subscriptionId}` and `GET /customers/{customerId}/subscriptions`.
+- [x] Create request class `CancelSubscriptionRequest` with field `CancelAtPeriodEnd`.
 - [ ] Add method `CancelSubscriptionAsync` to the subscription service.
 - [ ] Add method `ChangeSubscriptionPlanAsync` to support plan upgrades and downgrades.
 - [ ] Create class `ProrationCalculator` to calculate unused credit and remaining plan cost when changing plans mid-cycle.

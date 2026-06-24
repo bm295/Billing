@@ -23,6 +23,8 @@ public sealed class BillingDbContext(DbContextOptions<BillingDbContext> options)
 
     public DbSet<IdempotencyRecord> IdempotencyRecords => Set<IdempotencyRecord>();
 
+    public DbSet<UsageRecord> UsageRecords => Set<UsageRecord>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Customer>(entity =>
@@ -140,6 +142,26 @@ public sealed class BillingDbContext(DbContextOptions<BillingDbContext> options)
             entity.Property(record => record.ErrorCode).HasMaxLength(100);
             entity.Property(record => record.ErrorMessage).HasMaxLength(500);
             entity.HasIndex(record => record.Key).IsUnique();
+        });
+
+        modelBuilder.Entity<UsageRecord>(entity =>
+        {
+            entity.HasKey(record => record.Id);
+            entity.Property(record => record.MetricName).HasMaxLength(100).IsRequired();
+            entity.Property(record => record.Quantity).HasPrecision(18, 4);
+            entity.Property(record => record.IdempotencyKey).HasMaxLength(200).IsRequired();
+            entity.HasIndex(record => record.SubscriptionId);
+            entity.HasIndex(record => record.Timestamp);
+            entity.HasIndex(record => record.IdempotencyKey).IsUnique();
+
+            entity.HasOne(record => record.Customer)
+                .WithMany()
+                .HasForeignKey(record => record.CustomerId);
+
+            entity.HasOne(record => record.Subscription)
+                .WithMany()
+                .HasForeignKey(record => record.SubscriptionId)
+                .OnDelete(DeleteBehavior.NoAction);
         });
     }
 }

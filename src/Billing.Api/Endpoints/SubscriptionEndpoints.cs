@@ -15,6 +15,12 @@ public static class SubscriptionEndpoints
         group.MapPost("", CreateSubscriptionAsync)
             .WithName("CreateSubscription");
 
+        group.MapGet("/{subscriptionId:guid}", GetSubscriptionAsync)
+            .WithName("GetSubscription");
+
+        app.MapGet("/customers/{customerId:guid}/subscriptions", ListCustomerSubscriptionsAsync)
+            .WithName("ListCustomerSubscriptions");
+
         return app;
     }
 
@@ -77,6 +83,39 @@ public static class SubscriptionEndpoints
 
         var response = SubscriptionResponse.FromEntity(subscription);
         return Results.Created($"/subscriptions/{subscription.Id}", response);
+    }
+
+    private static async Task<IResult> GetSubscriptionAsync(
+        Guid subscriptionId,
+        BillingDbContext db,
+        CancellationToken cancellationToken)
+    {
+        var subscription = await db.Subscriptions
+            .SingleOrDefaultAsync(
+                item => item.Id == subscriptionId,
+                cancellationToken);
+
+        return subscription is null
+            ? Results.NotFound(new ApiError("subscription_not_found", "Subscription does not exist."))
+            : Results.Ok(SubscriptionResponse.FromEntity(subscription));
+    }
+
+    private static async Task<IResult> ListCustomerSubscriptionsAsync(
+        Guid customerId,
+        BillingDbContext db,
+        CancellationToken cancellationToken)
+    {
+        var subscriptions = await db.Subscriptions
+            .Where(subscription => subscription.CustomerId == customerId)
+            .OrderBy(subscription => subscription.StartDate)
+            .ThenBy(subscription => subscription.Id)
+            .ToArrayAsync(cancellationToken);
+
+        var response = subscriptions
+            .Select(SubscriptionResponse.FromEntity)
+            .ToArray();
+
+        return Results.Ok(response);
     }
 
     private static DateOnly? CalculateCurrentPeriodEnd(DateOnly currentPeriodStart, string billingInterval)
