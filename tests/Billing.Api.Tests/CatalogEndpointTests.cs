@@ -34,6 +34,23 @@ public sealed class CatalogEndpointTests : IClassFixture<BillingApiFactory>
     }
 
     [Fact]
+    public async Task CreateProduct_CreatesInactiveProduct()
+    {
+        var client = _factory.CreateClient();
+        var request = CreateProductRequest("create-inactive-product", active: false);
+
+        var httpResponse = await client.PostAsJsonAsync("/catalog/products", request);
+
+        Assert.Equal(HttpStatusCode.Created, httpResponse.StatusCode);
+
+        var response = await httpResponse.Content.ReadFromJsonAsync<ProductResponse>();
+        Assert.NotNull(response);
+        Assert.Equal(request.Name, response.Name);
+        Assert.Equal(request.Description, response.Description);
+        Assert.False(response.Active);
+    }
+
+    [Fact]
     public async Task DeactivateProduct_MarksProductInactive()
     {
         var client = _factory.CreateClient();
@@ -96,9 +113,60 @@ public sealed class CatalogEndpointTests : IClassFixture<BillingApiFactory>
 
         var response = await httpResponse.Content.ReadFromJsonAsync<PricePlanResponse>();
         Assert.NotNull(response);
+        Assert.Equal(product.Id, response.ProductId);
         Assert.Equal(BillingTypes.Usage, response.BillingType);
+        Assert.Equal(0.02m, response.Amount);
+        Assert.Equal("USD", response.Currency);
+        Assert.Equal(BillingIntervals.Month, response.BillingInterval);
         Assert.Equal("API request", response.UsageUnit);
         Assert.True(response.Active);
+    }
+
+    [Theory]
+    [InlineData("US")]
+    [InlineData("US1")]
+    [InlineData("USDE")]
+    public async Task CreatePricePlan_ReturnsBadRequest_WhenCurrencyIsNotThreeLetters(string currency)
+    {
+        var client = _factory.CreateClient();
+        var product = await CreateProductAsync(client, "invalid-currency-product");
+        var request = new CreatePricePlanRequest(
+            product.Id,
+            BillingTypes.Recurring,
+            10m,
+            currency,
+            BillingIntervals.Month,
+            null);
+
+        var httpResponse = await client.PostAsJsonAsync("/catalog/price-plans", request);
+
+        Assert.Equal(HttpStatusCode.BadRequest, httpResponse.StatusCode);
+
+        var error = await httpResponse.Content.ReadFromJsonAsync<ApiError>();
+        Assert.NotNull(error);
+        Assert.Equal("invalid_price_plan", error.Code);
+    }
+
+    [Fact]
+    public async Task CreatePricePlan_ReturnsBadRequest_WhenAmountIsNegative()
+    {
+        var client = _factory.CreateClient();
+        var product = await CreateProductAsync(client, "negative-amount-product");
+        var request = new CreatePricePlanRequest(
+            product.Id,
+            BillingTypes.Recurring,
+            -0.01m,
+            "USD",
+            BillingIntervals.Month,
+            null);
+
+        var httpResponse = await client.PostAsJsonAsync("/catalog/price-plans", request);
+
+        Assert.Equal(HttpStatusCode.BadRequest, httpResponse.StatusCode);
+
+        var error = await httpResponse.Content.ReadFromJsonAsync<ApiError>();
+        Assert.NotNull(error);
+        Assert.Equal("invalid_price_plan", error.Code);
     }
 
     [Fact]

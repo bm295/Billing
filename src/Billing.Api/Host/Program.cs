@@ -7,6 +7,7 @@ using Billing.Application.Invoices.Services;
 using Billing.Application.Payments;
 using Billing.Domain.Concurrency;
 using Billing.Application.Subscriptions;
+using Billing.Application.Usage;
 using Billing.Api.Endpoints;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -19,6 +20,7 @@ builder.Services.AddScoped<ICatalogService, CatalogService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IUsageService, UsageService>();
 builder.Services.AddSingleton<IValidateOptions<BillingDatabaseOptions>, BillingDatabaseOptionsValidator>();
 builder.Services.AddOptions<BillingDatabaseOptions>()
     .Configure(options =>

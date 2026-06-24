@@ -129,6 +129,25 @@ BEGIN
 END;
 GO
 
+
+IF OBJECT_ID(N'dbo.UsageRecords', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.UsageRecords
+    (
+        Id UNIQUEIDENTIFIER NOT NULL,
+        CustomerId UNIQUEIDENTIFIER NOT NULL,
+        SubscriptionId UNIQUEIDENTIFIER NOT NULL,
+        MetricName NVARCHAR(100) NOT NULL,
+        Quantity DECIMAL(18, 4) NOT NULL,
+        [Timestamp] DATETIMEOFFSET(7) NOT NULL,
+        IdempotencyKey NVARCHAR(200) NOT NULL,
+
+        CONSTRAINT PK_UsageRecords PRIMARY KEY CLUSTERED (Id),
+        CONSTRAINT CK_UsageRecords_Quantity_NonNegative CHECK (Quantity >= 0)
+    );
+END;
+GO
+
 IF OBJECT_ID(N'dbo.PricePlans', N'U') IS NULL
 BEGIN
     CREATE TABLE dbo.PricePlans
@@ -248,6 +267,23 @@ BEGIN
 END;
 GO
 
+
+IF OBJECT_ID(N'dbo.FK_UsageRecords_Customers_CustomerId', N'F') IS NULL
+BEGIN
+    ALTER TABLE dbo.UsageRecords
+    ADD CONSTRAINT FK_UsageRecords_Customers_CustomerId
+        FOREIGN KEY (CustomerId) REFERENCES dbo.Customers (Id);
+END;
+GO
+
+IF OBJECT_ID(N'dbo.FK_UsageRecords_Subscriptions_SubscriptionId', N'F') IS NULL
+BEGIN
+    ALTER TABLE dbo.UsageRecords
+    ADD CONSTRAINT FK_UsageRecords_Subscriptions_SubscriptionId
+        FOREIGN KEY (SubscriptionId) REFERENCES dbo.Subscriptions (Id);
+END;
+GO
+
 IF NOT EXISTS (
     SELECT 1
     FROM sys.indexes
@@ -257,6 +293,43 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX IX_Subscriptions_CustomerId
         ON dbo.Subscriptions (CustomerId);
+END;
+GO
+
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = N'IX_UsageRecords_SubscriptionId'
+        AND object_id = OBJECT_ID(N'dbo.UsageRecords')
+)
+BEGIN
+    CREATE INDEX IX_UsageRecords_SubscriptionId
+        ON dbo.UsageRecords (SubscriptionId);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = N'IX_UsageRecords_Timestamp'
+        AND object_id = OBJECT_ID(N'dbo.UsageRecords')
+)
+BEGIN
+    CREATE INDEX IX_UsageRecords_Timestamp
+        ON dbo.UsageRecords ([Timestamp]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = N'IX_UsageRecords_IdempotencyKey'
+        AND object_id = OBJECT_ID(N'dbo.UsageRecords')
+)
+BEGIN
+    CREATE UNIQUE INDEX IX_UsageRecords_IdempotencyKey
+        ON dbo.UsageRecords (IdempotencyKey);
 END;
 GO
 

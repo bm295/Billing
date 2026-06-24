@@ -53,6 +53,57 @@ public sealed class SubscriptionEndpointTests : IClassFixture<BillingApiFactory>
     }
 
     [Fact]
+    public async Task GetSubscription_ReturnsSubscription_WhenSubscriptionExists()
+    {
+        var client = _factory.CreateClient();
+        var created = await CreateSubscriptionAsync(client, new DateOnly(2026, 7, 1));
+
+        var httpResponse = await client.GetAsync($"/subscriptions/{created.Id}");
+
+        Assert.Equal(HttpStatusCode.OK, httpResponse.StatusCode);
+
+        var response = await httpResponse.Content.ReadFromJsonAsync<SubscriptionResponse>();
+        Assert.NotNull(response);
+        Assert.Equal(created.Id, response.Id);
+        Assert.Equal(created.CustomerId, response.CustomerId);
+        Assert.Equal(created.PricePlanId, response.PricePlanId);
+        Assert.Equal(created.CurrentPeriodStart, response.CurrentPeriodStart);
+        Assert.Equal(created.CurrentPeriodEnd, response.CurrentPeriodEnd);
+    }
+
+    [Fact]
+    public async Task GetSubscription_ReturnsNotFound_WhenSubscriptionDoesNotExist()
+    {
+        var client = _factory.CreateClient();
+
+        var httpResponse = await client.GetAsync($"/subscriptions/{Guid.NewGuid()}");
+
+        Assert.Equal(HttpStatusCode.NotFound, httpResponse.StatusCode);
+
+        var error = await httpResponse.Content.ReadFromJsonAsync<ApiError>();
+        Assert.NotNull(error);
+        Assert.Equal("subscription_not_found", error.Code);
+    }
+
+    [Fact]
+    public async Task ListCustomerSubscriptions_ReturnsCustomerSubscriptions()
+    {
+        var client = _factory.CreateClient();
+        var first = await CreateSubscriptionAsync(client, new DateOnly(2026, 8, 1));
+        var second = await CreateSubscriptionAsync(client, new DateOnly(2026, 9, 1));
+
+        var httpResponse = await client.GetAsync($"/customers/{BillingSeedData.SampleCustomerId}/subscriptions");
+
+        Assert.Equal(HttpStatusCode.OK, httpResponse.StatusCode);
+
+        var response = await httpResponse.Content.ReadFromJsonAsync<SubscriptionResponse[]>();
+        Assert.NotNull(response);
+        Assert.Contains(response, subscription => subscription.Id == first.Id);
+        Assert.Contains(response, subscription => subscription.Id == second.Id);
+        Assert.All(response, subscription => Assert.Equal(BillingSeedData.SampleCustomerId, subscription.CustomerId));
+    }
+
+    [Fact]
     public async Task CreateSubscription_ReturnsBadRequest_WhenCustomerDoesNotExist()
     {
         var client = _factory.CreateClient();
@@ -68,6 +119,14 @@ public sealed class SubscriptionEndpointTests : IClassFixture<BillingApiFactory>
     }
 
     [Fact]
+    public void CancelSubscriptionRequest_StoresCancelAtPeriodEnd()
+    {
+        var request = new CancelSubscriptionRequest(CancelAtPeriodEnd: true);
+
+        Assert.True(request.CancelAtPeriodEnd);
+    }
+
+    [Fact]
     public async Task CreateSubscription_ReturnsBadRequest_WhenPricePlanDoesNotExist()
     {
         var client = _factory.CreateClient();
@@ -80,6 +139,22 @@ public sealed class SubscriptionEndpointTests : IClassFixture<BillingApiFactory>
         var error = await httpResponse.Content.ReadFromJsonAsync<ApiError>();
         Assert.NotNull(error);
         Assert.Equal("price_plan_not_found", error.Code);
+    }
+
+    private static async Task<SubscriptionResponse> CreateSubscriptionAsync(HttpClient client, DateOnly startDate)
+    {
+        var request = new CreateSubscriptionRequest(
+            BillingSeedData.SampleCustomerId,
+            BillingSeedData.ProPlanId,
+            startDate);
+
+        var httpResponse = await client.PostAsJsonAsync("/subscriptions", request);
+
+        Assert.Equal(HttpStatusCode.Created, httpResponse.StatusCode);
+
+        var response = await httpResponse.Content.ReadFromJsonAsync<SubscriptionResponse>();
+        Assert.NotNull(response);
+        return response;
     }
 }
 
