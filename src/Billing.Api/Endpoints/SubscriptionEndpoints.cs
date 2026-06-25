@@ -1,8 +1,5 @@
-using Billing.Infrastructure.Persistence;
-using Billing.Domain;
 using Billing.Application.Common;
 using Billing.Application.Subscriptions;
-using Microsoft.EntityFrameworkCore;
 
 namespace Billing.Api.Endpoints;
 
@@ -18,6 +15,12 @@ public static class SubscriptionEndpoints
         group.MapGet("/{subscriptionId:guid}", GetSubscriptionAsync)
             .WithName("GetSubscription");
 
+        group.MapPost("/{subscriptionId:guid}/cancel", CancelSubscriptionAsync)
+            .WithName("CancelSubscription");
+
+        group.MapPost("/{subscriptionId:guid}/change-plan", ChangeSubscriptionPlanAsync)
+            .WithName("ChangeSubscriptionPlan");
+
         app.MapGet("/customers/{customerId:guid}/subscriptions", ListCustomerSubscriptionsAsync)
             .WithName("ListCustomerSubscriptions");
 
@@ -26,105 +29,90 @@ public static class SubscriptionEndpoints
 
     private static async Task<IResult> CreateSubscriptionAsync(
         CreateSubscriptionRequest request,
-        BillingDbContext db,
-        TimeProvider timeProvider,
+        ISubscriptionService subscriptionService,
         CancellationToken cancellationToken)
     {
-        var customerExists = await db.Customers
-            .AnyAsync(
-                customer => customer.Id == request.CustomerId
-                    && customer.Status == CustomerStatuses.Active,
-                cancellationToken);
-
-        if (!customerExists)
+        try
         {
-            return Results.BadRequest(new ApiError(
-                "customer_not_found",
-                "Customer does not exist or is not active."));
+            var subscription = await subscriptionService.CreateSubscriptionAsync(request, cancellationToken);
+            return Results.Created($"/subscriptions/{subscription.Id}", subscription);
         }
-
-        var pricePlan = await db.PricePlans
-            .SingleOrDefaultAsync(
-                plan => plan.Id == request.PricePlanId && plan.Active,
-                cancellationToken);
-
-        if (pricePlan is null)
+        catch (InvalidOperationException exception)
         {
-            return Results.BadRequest(new ApiError(
-                "price_plan_not_found",
-                "Price plan does not exist."));
+            return Results.BadRequest(new ApiError("customer_not_found", exception.Message));
         }
-
-        var startDate = request.StartDate
-            ?? DateOnly.FromDateTime(timeProvider.GetUtcNow().UtcDateTime);
-
-        var currentPeriodEnd = CalculateCurrentPeriodEnd(startDate, pricePlan.BillingInterval);
-        if (currentPeriodEnd is null)
+        catch (ArgumentException exception)
         {
-            return Results.BadRequest(new ApiError(
-                "billing_interval_not_supported",
-                $"Billing interval '{pricePlan.BillingInterval}' is not supported."));
+            return Results.BadRequest(new ApiError("price_plan_not_found", exception.Message));
         }
-
-        var subscription = new Subscription
+        catch (NotSupportedException exception)
         {
-            Id = Guid.NewGuid(),
-            CustomerId = request.CustomerId,
-            PricePlanId = request.PricePlanId,
-            Status = SubscriptionStatuses.Active,
-            StartDate = startDate,
-            CurrentPeriodStart = startDate,
-            CurrentPeriodEnd = currentPeriodEnd.Value,
-            CancelAtPeriodEnd = false
-        };
-
-        db.Subscriptions.Add(subscription);
-        await db.SaveChangesAsync(cancellationToken);
-
-        var response = SubscriptionResponse.FromEntity(subscription);
-        return Results.Created($"/subscriptions/{subscription.Id}", response);
+            return Results.BadRequest(new ApiError("billing_interval_not_supported", exception.Message));
+        }
     }
 
     private static async Task<IResult> GetSubscriptionAsync(
         Guid subscriptionId,
-        BillingDbContext db,
+        ISubscriptionService subscriptionService,
         CancellationToken cancellationToken)
     {
-        var subscription = await db.Subscriptions
-            .SingleOrDefaultAsync(
-                item => item.Id == subscriptionId,
-                cancellationToken);
+        var subscription = await subscriptionService.GetSubscriptionAsync(subscriptionId, cancellationToken);
 
         return subscription is null
             ? Results.NotFound(new ApiError("subscription_not_found", "Subscription does not exist."))
-            : Results.Ok(SubscriptionResponse.FromEntity(subscription));
+            : Results.Ok(subscription);
     }
 
     private static async Task<IResult> ListCustomerSubscriptionsAsync(
         Guid customerId,
-        BillingDbContext db,
+        ISubscriptionService subscriptionService,
         CancellationToken cancellationToken)
     {
-        var subscriptions = await db.Subscriptions
-            .Where(subscription => subscription.CustomerId == customerId)
-            .OrderBy(subscription => subscription.StartDate)
-            .ThenBy(subscription => subscription.Id)
-            .ToArrayAsync(cancellationToken);
-
-        var response = subscriptions
-            .Select(SubscriptionResponse.FromEntity)
-            .ToArray();
-
-        return Results.Ok(response);
+        var subscriptions = await subscriptionService.ListCustomerSubscriptionsAsync(customerId, cancellationToken);
+        return Results.Ok(subscriptions);
     }
 
-    private static DateOnly? CalculateCurrentPeriodEnd(DateOnly currentPeriodStart, string billingInterval)
+    private static async Task<IResult> CancelSubscriptionAsync(
+        Guid subscriptionId,
+        CancelSubscriptionRequest request,
+        ISubscriptionService subscriptionService,
+        CancellationToken cancellationToken)
     {
-        return billingInterval switch
+        var subscription = await subscriptionService.CancelSubscriptionAsync(subscriptionId, request, cancellationToken);
+
+        return subscription is null
+            ? Results.NotFound(new ApiError("subscription_not_found", "Subscription does not exist."))
+            : Results.Ok(subscription);
+    }
+
+    private static async Task<IResult> ChangeSubscriptionPlanAsync(
+        Guid subscriptionId,
+        ChangeSubscriptionPlanRequest request,
+        ISubscriptionService subscriptionService,
+        CancellationToken cancellationToken)
+    {
+        try
         {
-            BillingIntervals.Month => currentPeriodStart.AddMonths(1),
-            BillingIntervals.Year => currentPeriodStart.AddYears(1),
-            _ => null
-        };
+            var subscription = await subscriptionService.ChangeSubscriptionPlanAsync(
+                subscriptionId,
+                request,
+                cancellationToken);
+
+            return subscription is null
+                ? Results.NotFound(new ApiError("subscription_not_found", "Subscription does not exist."))
+                : Results.Ok(subscription);
+        }
+        catch (ArgumentException exception)
+        {
+            return Results.BadRequest(new ApiError("price_plan_not_found", exception.Message));
+        }
+        catch (InvalidOperationException exception)
+        {
+            return Results.BadRequest(new ApiError("subscription_not_active", exception.Message));
+        }
+        catch (NotSupportedException exception)
+        {
+            return Results.BadRequest(new ApiError("billing_interval_not_supported", exception.Message));
+        }
     }
 }

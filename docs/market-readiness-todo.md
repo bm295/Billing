@@ -46,15 +46,15 @@ This checklist breaks the remaining work into small, clear, implementation-ready
 
 - [x] Extend `SubscriptionEndpoints` with `GET /subscriptions/{subscriptionId}` and `GET /customers/{customerId}/subscriptions`.
 - [x] Create request class `CancelSubscriptionRequest` with field `CancelAtPeriodEnd`.
-- [ ] Add method `CancelSubscriptionAsync` to the subscription service.
-- [ ] Add method `ChangeSubscriptionPlanAsync` to support plan upgrades and downgrades.
-- [ ] Create class `ProrationCalculator` to calculate unused credit and remaining plan cost when changing plans mid-cycle.
-- [ ] Add tests in `SubscriptionEndpointTests` for cancellation, plan changes, and proration results.
+- [x] Add method `CancelSubscriptionAsync` to the subscription service.
+- [x] Add method `ChangeSubscriptionPlanAsync` to support plan upgrades and downgrades.
+- [x] Create class `ProrationCalculator` to calculate unused credit and remaining plan cost when changing plans mid-cycle.
+- [x] Add tests in `SubscriptionEndpointTests` for cancellation, plan changes, and proration results.
 
 ## 6. Invoice Lifecycle
 
-- [ ] Add endpoint `GET /invoices/{invoiceId}` to fetch one invoice with lines.
-- [ ] Add endpoint `GET /customers/{customerId}/invoices` to list customer invoices.
+- [x] Add endpoint `GET /invoices/{invoiceId}` to fetch one invoice with lines.
+- [x] Add endpoint `GET /customers/{customerId}/invoices` to list customer invoices.
 - [ ] Create request class `FinalizeInvoiceRequest` for explicitly finalizing draft invoices.
 - [ ] Add invoice status `Draft` and only allow payment after an invoice is finalized as `Open`.
 - [ ] Create class `InvoiceNumberGenerator` to generate human-readable invoice numbers such as `INV-2026-000001`.

@@ -20,6 +20,8 @@ builder.Services.AddScoped<ICatalogService, CatalogService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<ProrationCalculator>();
+builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IUsageService, UsageService>();
 builder.Services.AddSingleton<IValidateOptions<BillingDatabaseOptions>, BillingDatabaseOptionsValidator>();
 builder.Services.AddOptions<BillingDatabaseOptions>()

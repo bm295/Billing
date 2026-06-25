@@ -126,6 +126,87 @@ public sealed class SubscriptionEndpointTests : IClassFixture<BillingApiFactory>
         Assert.True(request.CancelAtPeriodEnd);
     }
 
+
+    [Fact]
+    public async Task CancelSubscription_CancelsImmediately_WhenCancelAtPeriodEndIsFalse()
+    {
+        var client = _factory.CreateClient();
+        var created = await CreateSubscriptionAsync(client, new DateOnly(2026, 10, 1));
+        var request = new CancelSubscriptionRequest(CancelAtPeriodEnd: false);
+
+        var httpResponse = await client.PostAsJsonAsync($"/subscriptions/{created.Id}/cancel", request);
+
+        Assert.Equal(HttpStatusCode.OK, httpResponse.StatusCode);
+
+        var response = await httpResponse.Content.ReadFromJsonAsync<SubscriptionResponse>();
+        Assert.NotNull(response);
+        Assert.Equal(created.Id, response.Id);
+        Assert.Equal(SubscriptionStatuses.Canceled, response.Status);
+        Assert.False(response.CancelAtPeriodEnd);
+    }
+
+    [Fact]
+    public async Task CancelSubscription_MarksCancelAtPeriodEnd_WhenRequested()
+    {
+        var client = _factory.CreateClient();
+        var created = await CreateSubscriptionAsync(client, new DateOnly(2026, 10, 1));
+        var request = new CancelSubscriptionRequest(CancelAtPeriodEnd: true);
+
+        var httpResponse = await client.PostAsJsonAsync($"/subscriptions/{created.Id}/cancel", request);
+
+        Assert.Equal(HttpStatusCode.OK, httpResponse.StatusCode);
+
+        var response = await httpResponse.Content.ReadFromJsonAsync<SubscriptionResponse>();
+        Assert.NotNull(response);
+        Assert.Equal(SubscriptionStatuses.Active, response.Status);
+        Assert.True(response.CancelAtPeriodEnd);
+    }
+
+    [Fact]
+    public async Task ChangeSubscriptionPlan_UpdatesPlanAndReturnsProration_ForActiveSubscription()
+    {
+        var client = _factory.CreateClient();
+        var premiumPlanId = await CreateMonthlyPlanAsync(109m);
+        var created = await CreateSubscriptionAsync(client, new DateOnly(2026, 6, 1));
+        var request = new ChangeSubscriptionPlanRequest(premiumPlanId);
+
+        var httpResponse = await client.PostAsJsonAsync($"/subscriptions/{created.Id}/change-plan", request);
+
+        Assert.Equal(HttpStatusCode.OK, httpResponse.StatusCode);
+
+        var response = await httpResponse.Content.ReadFromJsonAsync<ChangeSubscriptionPlanResponse>();
+        Assert.NotNull(response);
+        Assert.Equal(created.Id, response.Subscription.Id);
+        Assert.Equal(premiumPlanId, response.Subscription.PricePlanId);
+        Assert.Equal(new DateOnly(2026, 6, 1), response.Subscription.CurrentPeriodStart);
+        Assert.Equal(new DateOnly(2026, 7, 1), response.Subscription.CurrentPeriodEnd);
+        Assert.False(response.Subscription.CancelAtPeriodEnd);
+        Assert.Equal(9.80m, response.Proration.UnusedCredit);
+        Assert.Equal(21.80m, response.Proration.RemainingPlanCost);
+        Assert.Equal(12.00m, response.Proration.NetAmountDue);
+    }
+
+    [Fact]
+    public async Task ChangeSubscriptionPlan_ReturnsBadRequest_WhenSubscriptionIsCanceled()
+    {
+        var client = _factory.CreateClient();
+        var premiumPlanId = await CreateMonthlyPlanAsync(109m);
+        var created = await CreateSubscriptionAsync(client, new DateOnly(2026, 12, 1));
+        await client.PostAsJsonAsync(
+            $"/subscriptions/{created.Id}/cancel",
+            new CancelSubscriptionRequest(CancelAtPeriodEnd: false));
+
+        var httpResponse = await client.PostAsJsonAsync(
+            $"/subscriptions/{created.Id}/change-plan",
+            new ChangeSubscriptionPlanRequest(premiumPlanId));
+
+        Assert.Equal(HttpStatusCode.BadRequest, httpResponse.StatusCode);
+
+        var error = await httpResponse.Content.ReadFromJsonAsync<ApiError>();
+        Assert.NotNull(error);
+        Assert.Equal("subscription_not_active", error.Code);
+    }
+
     [Fact]
     public async Task CreateSubscription_ReturnsBadRequest_WhenPricePlanDoesNotExist()
     {
@@ -139,6 +220,29 @@ public sealed class SubscriptionEndpointTests : IClassFixture<BillingApiFactory>
         var error = await httpResponse.Content.ReadFromJsonAsync<ApiError>();
         Assert.NotNull(error);
         Assert.Equal("price_plan_not_found", error.Code);
+    }
+
+    private async Task<Guid> CreateMonthlyPlanAsync(decimal amount)
+    {
+        var pricePlanId = Guid.NewGuid();
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<BillingDbContext>();
+        db.PricePlans.Add(new PricePlan
+        {
+            Id = pricePlanId,
+            ProductId = BillingSeedData.ApiPlatformProductId,
+            BillingType = BillingTypes.Recurring,
+            Amount = amount,
+            Currency = "USD",
+            BillingInterval = BillingIntervals.Month,
+            UsageUnit = "API_CALL",
+            Active = true
+        });
+
+        await db.SaveChangesAsync();
+
+        return pricePlanId;
     }
 
     private static async Task<SubscriptionResponse> CreateSubscriptionAsync(HttpClient client, DateOnly startDate)
