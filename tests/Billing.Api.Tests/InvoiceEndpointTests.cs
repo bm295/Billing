@@ -61,6 +61,58 @@ public sealed class InvoiceEndpointTests : IClassFixture<BillingApiFactory>
     }
 
     [Fact]
+    public async Task GetInvoice_ReturnsInvoiceWithLines_WhenInvoiceExists()
+    {
+        var client = _factory.CreateClient();
+        var created = await GenerateInvoiceAsync(client);
+
+        var httpResponse = await client.GetAsync($"/invoices/{created.Id}");
+
+        Assert.Equal(HttpStatusCode.OK, httpResponse.StatusCode);
+
+        var response = await httpResponse.Content.ReadFromJsonAsync<InvoiceResponse>();
+        Assert.NotNull(response);
+        Assert.Equal(created.Id, response.Id);
+        Assert.Equal(created.CustomerId, response.CustomerId);
+        Assert.Equal(created.SubscriptionId, response.SubscriptionId);
+        Assert.Equal(created.AmountDue, response.AmountDue);
+        Assert.NotEmpty(response.Lines);
+        Assert.Contains(response.Lines, line => line.Description == "API Platform monthly subscription");
+    }
+
+    [Fact]
+    public async Task GetInvoice_ReturnsNotFound_WhenInvoiceDoesNotExist()
+    {
+        var client = _factory.CreateClient();
+
+        var httpResponse = await client.GetAsync($"/invoices/{Guid.NewGuid()}");
+
+        Assert.Equal(HttpStatusCode.NotFound, httpResponse.StatusCode);
+
+        var error = await httpResponse.Content.ReadFromJsonAsync<ApiError>();
+        Assert.NotNull(error);
+        Assert.Equal("invoice_not_found", error.Code);
+    }
+
+    [Fact]
+    public async Task ListCustomerInvoices_ReturnsInvoicesWithLines_ForCustomer()
+    {
+        var client = _factory.CreateClient();
+        var created = await GenerateInvoiceAsync(client);
+
+        var httpResponse = await client.GetAsync($"/customers/{created.CustomerId}/invoices");
+
+        Assert.Equal(HttpStatusCode.OK, httpResponse.StatusCode);
+
+        var response = await httpResponse.Content.ReadFromJsonAsync<InvoiceResponse[]>();
+        Assert.NotNull(response);
+
+        var listedInvoice = Assert.Single(response.Where(invoice => invoice.Id == created.Id));
+        Assert.Equal(created.CustomerId, listedInvoice.CustomerId);
+        Assert.NotEmpty(listedInvoice.Lines);
+    }
+
+    [Fact]
     public async Task GenerateInvoice_ReturnsBadRequest_WhenSubscriptionDoesNotExist()
     {
         var client = _factory.CreateClient();
@@ -133,6 +185,20 @@ public sealed class InvoiceEndpointTests : IClassFixture<BillingApiFactory>
         var db = scope.ServiceProvider.GetRequiredService<BillingDbContext>();
         var invoiceCount = await db.Invoices.CountAsync(invoice => invoice.SubscriptionId == subscription.Id);
         Assert.Equal(1, invoiceCount);
+    }
+
+    private static async Task<InvoiceResponse> GenerateInvoiceAsync(HttpClient client)
+    {
+        var subscription = await CreateSubscriptionAsync(client);
+        var request = new GenerateInvoiceRequest(subscription.Id);
+
+        var httpResponse = await client.PostAsJsonAsync("/invoices/generate", request);
+
+        Assert.Equal(HttpStatusCode.Created, httpResponse.StatusCode);
+
+        var invoice = await httpResponse.Content.ReadFromJsonAsync<InvoiceResponse>();
+        Assert.NotNull(invoice);
+        return invoice;
     }
 
     private static async Task<SubscriptionResponse> CreateSubscriptionAsync(HttpClient client)

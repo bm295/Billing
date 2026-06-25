@@ -11,6 +11,29 @@ public sealed class InvoiceService(
     TimeProvider timeProvider,
     IKeyedLock keyedLock) : IInvoiceService
 {
+    public async Task<Invoice?> GetInvoiceAsync(
+        Guid invoiceId,
+        CancellationToken cancellationToken)
+    {
+        return await db.Invoices
+            .Include(invoice => invoice.Lines)
+            .SingleOrDefaultAsync(
+                invoice => invoice.Id == invoiceId,
+                cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<Invoice>> ListCustomerInvoicesAsync(
+        Guid customerId,
+        CancellationToken cancellationToken)
+    {
+        return await db.Invoices
+            .Include(invoice => invoice.Lines)
+            .Where(invoice => invoice.CustomerId == customerId)
+            .OrderByDescending(invoice => invoice.CreatedAt)
+            .ThenByDescending(invoice => invoice.Id)
+            .ToArrayAsync(cancellationToken);
+    }
+
     public async Task<InvoiceGenerationResult> GenerateRecurringInvoiceAsync(
         Guid subscriptionId,
         CancellationToken cancellationToken)

@@ -16,10 +16,39 @@ public static class InvoiceEndpoints
         group.MapPost("/generate", GenerateInvoiceAsync)
             .WithName("GenerateInvoice");
 
+        group.MapGet("/{invoiceId:guid}", GetInvoiceAsync)
+            .WithName("GetInvoice");
+
         group.MapPost("/{invoiceId:guid}/pay", PayInvoiceAsync)
             .WithName("PayInvoice");
 
+        app.MapGet("/customers/{customerId:guid}/invoices", ListCustomerInvoicesAsync)
+            .WithName("ListCustomerInvoices");
+
         return app;
+    }
+
+    private static async Task<IResult> GetInvoiceAsync(
+        Guid invoiceId,
+        IInvoiceService invoiceService,
+        CancellationToken cancellationToken)
+    {
+        var invoice = await invoiceService.GetInvoiceAsync(invoiceId, cancellationToken);
+
+        return invoice is null
+            ? Results.NotFound(new ApiError("invoice_not_found", "Invoice does not exist."))
+            : Results.Ok(InvoiceResponse.FromEntity(invoice));
+    }
+
+    private static async Task<IResult> ListCustomerInvoicesAsync(
+        Guid customerId,
+        IInvoiceService invoiceService,
+        CancellationToken cancellationToken)
+    {
+        var invoices = await invoiceService.ListCustomerInvoicesAsync(customerId, cancellationToken);
+        var response = invoices.Select(InvoiceResponse.FromEntity).ToArray();
+
+        return Results.Ok(response);
     }
 
     private static async Task<IResult> GenerateInvoiceAsync(

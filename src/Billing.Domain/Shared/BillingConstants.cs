@@ -8,6 +8,7 @@ public static class CustomerStatuses
 public static class SubscriptionStatuses
 {
     public const string Active = "active";
+    public const string Canceled = "canceled";
 }
 
 public static class BillingTypes
