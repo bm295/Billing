@@ -1,4 +1,4 @@
-using Billing.Application.Common;
+using Billing.Api.Contracts;
 using Billing.Application.Invoices.Contracts;
 using Billing.Application.Invoices.Results;
 using Billing.Application.Invoices.Services;

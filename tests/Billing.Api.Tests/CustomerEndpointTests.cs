@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
-using Billing.Application.Common;
+using Billing.Api.Contracts;
 using Billing.Application.Customers;
 using Billing.Domain;
 using Billing.Infrastructure.Persistence;

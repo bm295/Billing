@@ -1,3 +1,3 @@
-namespace Billing.Application.Common;
+namespace Billing.Api.Contracts;
 
 public sealed record ApiError(string Code, string Message);
