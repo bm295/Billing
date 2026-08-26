@@ -1,0 +1,80 @@
+name: Pull request validation
+
+on: [pull_request]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-validation-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  build-test-coverage:
+    name: Build, test, and coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+          cache: true
+          cache-dependency-path: '**/*.csproj'
+
+      - name: Restore dependencies
+        run: dotnet restore Billing.sln
+
+      - name: Build
+        run: dotnet build Billing.sln --configuration Release --no-restore
+
+      - name: Test with coverage
+        run: >-
+          dotnet test Billing.sln
+          --configuration Release
+          --no-build
+          --collect:"XPlat Code Coverage"
+          --results-directory TestResults
+          --logger "console;verbosity=normal"
+
+      - name: Add coverage to job summary
+        id: coverage
+        shell: python
+        run: |
+          import os
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+
+          reports = sorted(Path("TestResults").glob("**/coverage.cobertura.xml"))
+          if not reports:
+              raise SystemExit("No Cobertura coverage report was generated")
+
+          covered = 0
+          valid = 0
+          for report in reports:
+              root = ET.parse(report).getroot()
+              covered += int(root.attrib["lines-covered"])
+              valid += int(root.attrib["lines-valid"])
+
+          percentage = covered / valid * 100 if valid else 0
+          summary = os.environ["GITHUB_STEP_SUMMARY"]
+          with open(summary, "a", encoding="utf-8") as output:
+              output.write("## Code coverage\n\n")
+              output.write("| Metric | Result |\n| --- | ---: |\n")
+              output.write(f"| Line coverage | **{percentage:.2f}%** |\n")
+              output.write(f"| Lines covered | {covered} / {valid} |\n")
+
+          print(f"::notice title=Code coverage::Line coverage: {percentage:.2f}% ({covered}/{valid})")
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: TestResults/**/coverage.cobertura.xml
+          if-no-files-found: warn
+          retention-days: 14
