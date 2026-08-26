@@ -264,6 +264,9 @@ public sealed class SubscriptionEndpointTests : IClassFixture<BillingApiFactory>
 
 public sealed class BillingApiFactory : WebApplicationFactory<Program>
 {
+    private static readonly DateTimeOffset TestUtcNow =
+        new(2026, 6, 25, 0, 0, 0, TimeSpan.Zero);
+
     private readonly string _databaseName = Guid.NewGuid().ToString("N");
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -271,10 +274,17 @@ public sealed class BillingApiFactory : WebApplicationFactory<Program>
         builder.ConfigureServices(services =>
         {
             services.RemoveAll<DbContextOptions<BillingDbContext>>();
+            services.RemoveAll<TimeProvider>();
+            services.AddSingleton<TimeProvider>(new FixedTimeProvider(TestUtcNow));
             services.AddDbContext<BillingDbContext>(options =>
             {
                 options.UseInMemoryDatabase(_databaseName);
             });
         });
+    }
+
+    private sealed class FixedTimeProvider(DateTimeOffset utcNow) : TimeProvider
+    {
+        public override DateTimeOffset GetUtcNow() => utcNow;
     }
 }
