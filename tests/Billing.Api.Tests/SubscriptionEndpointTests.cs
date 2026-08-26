@@ -7,6 +7,7 @@ using Billing.Application.Subscriptions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -274,6 +275,7 @@ public sealed class BillingApiFactory : WebApplicationFactory<Program>
         builder.ConfigureServices(services =>
         {
             services.RemoveAll<DbContextOptions<BillingDbContext>>();
+            services.RemoveAll<IDbContextOptionsConfiguration<BillingDbContext>>();
             services.RemoveAll<TimeProvider>();
             services.AddSingleton<TimeProvider>(new FixedTimeProvider(TestUtcNow));
             services.AddDbContext<BillingDbContext>(options =>
