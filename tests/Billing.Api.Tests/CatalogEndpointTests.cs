@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Billing.Application.Catalog;
-using Billing.Application.Common;
+using Billing.Api.Contracts;
 using Billing.Domain;
 
 namespace Billing.Api.Tests;

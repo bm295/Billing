@@ -1,4 +1,4 @@
-using Billing.Application.Common;
+using Billing.Api.Contracts;
 using Billing.Application.Customers;
 
 namespace Billing.Api.Endpoints;

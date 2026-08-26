@@ -1,5 +1,5 @@
 using Billing.Application.Catalog;
-using Billing.Application.Common;
+using Billing.Api.Contracts;
 
 namespace Billing.Api.Endpoints;
 

@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Billing.Infrastructure.Persistence;
 using Billing.Domain;
-using Billing.Application.Common;
+using Billing.Api.Contracts;
 using Billing.Application.Subscriptions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
