@@ -24,3 +24,10 @@ dotnet run --project src\Billing.Api\Billing.Api.csproj
 ```powershell
 dotnet test Billing.sln
 ```
+
+## Pull request checks
+
+Pull requests automatically restore and build the solution, run the test suite, and
+collect line coverage. The coverage percentage is displayed in the GitHub Actions
+job summary, and the Cobertura XML report is retained as a workflow artifact for 14
+days.
