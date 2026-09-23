@@ -1,0 +1,1 @@
+package com.example.billing.api;import java.util.Map;import org.springframework.web.bind.annotation.*;@RestController public class RootController{@GetMapping("/")Map<String,String> root(){return Map.of("service","Billing API");}}

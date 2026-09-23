@@ -1,66 +1,25 @@
 # Operations Runbook
 
-## Deploying Database Migrations Before the API
+## Triển khai schema trước API
 
-Run Entity Framework Core migrations as a separate deployment step before starting or rolling out a new API version. This keeps schema changes explicit, lets operators inspect SQL before it reaches production, and avoids relying on application startup to mutate the database.
+Ứng dụng dùng `spring.jpa.hibernate.ddl-auto=validate`: nó kiểm tra schema lúc khởi động nhưng không tự thay đổi production database. Hãy review và chạy `db/sqlserver/001_initial_schema.sql` bằng công cụ triển khai SQL chuẩn của tổ chức trước khi rollout API.
 
-### Preconditions
+Trước khi chạy script, xác nhận backup gần nhất, quyền tạo/thay đổi schema và kết nối tới SQL Server. Sau khi chạy, kiểm tra các unique index quan trọng:
 
-- Confirm the release has been built and tested from the exact commit that will be deployed.
-- Confirm the production `ConnectionStrings:BillingDb` secret is present in the deployment environment.
-- Confirm the target SQL Server database is reachable from the runner that will execute migrations.
-- Confirm you have database credentials with permission to create or alter the billing schema.
-- Take or verify a recent database backup before applying migrations in production.
+- `IX_Invoices_SubscriptionId_BillingPeriod`
+- `IX_Payments_IdempotencyKey`
+- `IX_Payments_InvoiceId_Succeeded`
+- `IX_PaymentAttempts_PaymentId_AttemptNumber`
+- `IX_IdempotencyRecords_Key`
+- `IX_UsageRecords_IdempotencyKey`
 
-### Review Pending Migrations
+## Cấu hình runtime
 
-From the repository root, list migrations that have not been applied to the target database:
-
-```bash
-dotnet ef migrations list \
-  --project src/Billing.Infrastructure/Billing.Infrastructure.csproj \
-  --startup-project src/Billing.Api/Billing.Api.csproj \
-  --context BillingDbContext
-```
-
-The initial production schema migration is `20260623000000_InitialBillingSchema`. If the command shows no pending migrations, do not apply schema changes for this release.
-
-### Generate and Review SQL
-
-Generate an idempotent SQL script and have it reviewed before production execution:
+Thiết lập `BILLING_DB_URL`, `BILLING_DB_USERNAME`, `BILLING_DB_PASSWORD`, rồi build và kiểm tra artifact:
 
 ```bash
-dotnet ef migrations script --idempotent \
-  --project src/Billing.Infrastructure/Billing.Infrastructure.csproj \
-  --startup-project src/Billing.Api/Billing.Api.csproj \
-  --context BillingDbContext \
-  --output artifacts/billing-migrations.sql
+mvn --batch-mode clean verify
+java -jar target/billing-1.0.0.jar
 ```
 
-Review `artifacts/billing-migrations.sql` for destructive operations, long-running table rewrites, lock-heavy index changes, and expected data backfills. Attach the reviewed script to the release record.
-
-### Apply Migrations
-
-Prefer applying the reviewed SQL script with the organization's standard database deployment tool. If `dotnet ef` is the approved deployment path for the environment, apply migrations with:
-
-```bash
-dotnet ef database update \
-  --project src/Billing.Infrastructure/Billing.Infrastructure.csproj \
-  --startup-project src/Billing.Api/Billing.Api.csproj \
-  --context BillingDbContext
-```
-
-Run this command with the same `ConnectionStrings:BillingDb` value that the production API will use. The API includes startup validation for this setting, but migration execution should verify the secret before the API rollout begins.
-
-### Verify Before API Rollout
-
-After migration execution and before deploying the API:
-
-1. Re-run `dotnet ef migrations list` against the production database and confirm there are no pending migrations.
-2. Confirm the `__EFMigrationsHistory` table contains the expected latest migration ID.
-3. Run a lightweight database connectivity check from the deployment environment.
-4. Start or roll out the API only after the migration status is verified.
-
-### Rollback Guidance
-
-If migration execution fails, stop the API rollout, preserve the migration logs, and restore from the verified backup if the database is left in an unsafe partial state. If the API rollout fails after migrations succeeded, prefer rolling the API back to the previous version only when the applied migration is backward compatible; otherwise follow the release-specific rollback plan.
+Chỉ rollout API sau khi schema validation thành công. Nếu script database lỗi, dừng rollout và khôi phục từ backup khi database ở trạng thái không an toàn.

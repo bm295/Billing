@@ -159,6 +159,8 @@ BEGIN
         Currency NVARCHAR(3) NOT NULL,
         BillingInterval NVARCHAR(20) NOT NULL,
         UsageUnit NVARCHAR(100) NULL,
+        Active BIT NOT NULL
+            CONSTRAINT DF_PricePlans_Active DEFAULT 1,
 
         CONSTRAINT PK_PricePlans PRIMARY KEY CLUSTERED (Id),
         CONSTRAINT CK_PricePlans_BillingType CHECK (BillingType IN (N'recurring', N'usage')),

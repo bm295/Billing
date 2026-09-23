@@ -1,0 +1,3 @@
+package com.example.billing.domain;
+import jakarta.persistence.*; import java.time.OffsetDateTime; import java.util.UUID;
+@Entity @Table(name="Customers",uniqueConstraints=@UniqueConstraint(name="UX_Customers_Email",columnNames="Email")) public class Customer { @Id @Column(name="Id") public UUID id; @Column(name="Email",length=320,nullable=false) public String email; @Column(name="CompanyName",length=200,nullable=false) public String companyName; @Column(name="BillingAddress",length=500,nullable=false) public String billingAddress; @Column(name="PaymentMethodId",length=100,nullable=false) public String paymentMethodId; @Column(name="Status",length=50,nullable=false) public String status; @Column(name="CreatedAt",nullable=false) public OffsetDateTime createdAt; }

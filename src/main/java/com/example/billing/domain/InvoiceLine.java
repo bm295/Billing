@@ -1,0 +1,3 @@
+package com.example.billing.domain;
+import jakarta.persistence.*; import java.math.BigDecimal; import java.util.UUID;
+@Entity @Table(name="InvoiceLines") public class InvoiceLine { @Id @Column(name="Id") public UUID id; @Column(name="InvoiceId",nullable=false,insertable=false,updatable=false) public UUID invoiceId; @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="InvoiceId",nullable=false) public Invoice invoice; @Column(name="Description",length=500,nullable=false) public String description; @Column(name="Amount",precision=18,scale=2,nullable=false) public BigDecimal amount; @Column(name="Quantity",precision=18,scale=4,nullable=false) public BigDecimal quantity; @Column(name="UnitPrice",precision=18,scale=4,nullable=false) public BigDecimal unitPrice; }

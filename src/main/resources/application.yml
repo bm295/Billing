@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: ${BILLING_DB_URL:jdbc:sqlserver://localhost:1433;databaseName=Billing;encrypt=true;trustServerCertificate=true}
+    username: ${BILLING_DB_USERNAME:sa}
+    password: ${BILLING_DB_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        globally_quoted_identifiers: true
+        physical_naming_strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+server:
+  port: ${PORT:8080}

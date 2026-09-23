@@ -1,0 +1,3 @@
+package com.example.billing.domain;
+import jakarta.persistence.*; import java.math.BigDecimal; import java.util.UUID;
+@Entity @Table(name="PricePlans") public class PricePlan { @Id @Column(name="Id") public UUID id; @Column(name="ProductId",nullable=false) public UUID productId; @Column(name="BillingType",length=50,nullable=false) public String billingType; @Column(name="Amount",precision=18,scale=2,nullable=false) public BigDecimal amount; @Column(name="Currency",length=3,nullable=false) public String currency; @Column(name="BillingInterval",length=20,nullable=false) public String billingInterval; @Column(name="UsageUnit",length=100) public String usageUnit; @Column(name="Active",nullable=false) public boolean active; }
