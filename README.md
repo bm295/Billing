@@ -36,3 +36,7 @@ java -jar target/billing-1.0.0.jar
 ```
 
 API routes và JSON contracts được giữ tương thích với bản C# trước đây. Payment endpoint vẫn bắt buộc `Idempotency-Key`; trạng thái idempotency, request hash và unique constraints được lưu trong database.
+
+## Collection queue position preview
+
+See [API and examples](docs/features/collection-queue-position-preview.md) for previewing an invoice position after proposed queue suffix reversals.
