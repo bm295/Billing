@@ -1,0 +1,33 @@
+:root { color-scheme: light; font-family: "Segoe UI", system-ui, sans-serif; color: #18273f; background: #f2f5fa; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+main { max-width: 820px; margin: 64px auto; padding: 0 24px; }
+.brand { color: #315fbe; font-weight: 700; font-size: .875rem; letter-spacing: .1em; }
+h1 { font-size: clamp(2rem, 5vw, 2.8rem); letter-spacing: -.04em; line-height: 1.2; margin: 18px 0; }
+header p { color: #53647d; line-height: 1.7; max-width: 620px; margin-bottom: 32px; }
+.card { background: white; border: 1px solid #dce3ee; border-radius: 16px; padding: 28px; margin: 20px 0; box-shadow: 0 4px 20px #18273f04; }
+h2 { font-size: 1.125rem; margin: 0 0 24px; }
+label { display: block; font-size: .9rem; font-weight: 600; margin-bottom: 10px; }
+input { width: 100%; font: inherit; padding: 14px; border: 1px solid #a5b3c8; border-radius: 8px; color: inherit; background: white; }
+input:focus-visible, button:focus-visible { outline: 3px solid #91b7ff; outline-offset: 3px; }
+.hint, footer { color: #596a82; font-size: .875rem; line-height: 1.65; overflow-wrap: anywhere; }
+button { margin-top: 10px; background: #275ac4; color: white; border: 0; padding: 14px 22px; border-radius: 8px; font: inherit; font-weight: 600; cursor: pointer; }
+button:hover { background: #1c469e; }
+button:disabled { opacity: .65; cursor: wait; }
+#status { font-size: .875rem; color: #53647d; margin: 18px 0 0; line-height: 1.6; }
+#error { color: #a02332; background: #fff0f1; border-radius: 8px; padding: 14px; line-height: 1.6; }
+.result-header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.result-header h2 { margin-bottom: 14px; }
+#model { color: #315fbe; background: #edf3ff; border-radius: 6px; padding: 5px 10px; font-size: .875rem; overflow-wrap: anywhere; }
+#explanation { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.85; }
+footer { margin-top: 24px; }
+@media (max-width: 540px) { main { margin: 32px auto; padding: 0 16px; } .card { padding: 22px; } button { width: 100%; } }
+textarea { width: 100%; font: inherit; padding: 14px; border: 1px solid #a5b3c8; border-radius: 8px; color: inherit; background: white; resize: vertical; }
+textarea:focus-visible { outline: 3px solid #91b7ff; outline-offset: 3px; }
+.actions { display: flex; gap: 12px; flex-wrap: wrap; }
+button.secondary { background: #eaf0fa; color: #244879; }
+.message { padding: 16px; margin: 12px 0; border-radius: 10px; background: #f2f5fa; overflow-wrap: anywhere; }
+.message.user { background: #edf3ff; }
+.message strong { display: block; margin-bottom: 8px; font-size: .875rem; }
+.message div { white-space: pre-wrap; line-height: 1.75; }
+#chat-form { margin-top: 24px; }

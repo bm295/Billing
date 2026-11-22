@@ -13,3 +13,8 @@ spring:
         physical_naming_strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 server:
   port: ${PORT:8080}
+billing:
+  llm:
+    base-url: ${BILLING_LLM_BASE_URL:http://localhost:11434}
+    model: ${BILLING_LLM_MODEL:qwen3:8b}
+    timeout-seconds: ${BILLING_LLM_TIMEOUT_SECONDS:120}

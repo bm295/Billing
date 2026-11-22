@@ -1,0 +1,22 @@
+﻿<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Billing · Chat với LLM</title>
+<link rel="stylesheet" href="/llm.css"><script src="/llm.js" defer></script>
+</head>
+<body><main>
+<header><span class="brand">BILLING / LOCAL AI</span><h1>Trò chuyện với LLM.</h1>
+<p>Nhập câu hỏi để trò chuyện trực tiếp với model qua Ollama. Không cần hóa đơn hay SQL Server.</p></header>
+<section class="card" aria-labelledby="chat-title">
+<div class="result-header"><h2 id="chat-title">Cuộc trò chuyện</h2><span id="model" hidden></span></div>
+<p id="empty-state" class="hint">Bắt đầu bằng một câu hỏi. Bạn có thể hỏi tiếp dựa trên câu trả lời trước.</p>
+<div id="messages" role="log" aria-label="Lịch sử trò chuyện" aria-live="polite"></div>
+<p id="status" role="status">Sẵn sàng nhận câu hỏi.</p><p id="error" role="alert" hidden></p>
+<form id="chat-form"><label for="prompt">Tin nhắn của bạn</label>
+<textarea id="prompt" rows="4" maxlength="8000" required placeholder="Ví dụ: Hãy giải thích LLM là gì bằng tiếng Việt."></textarea>
+<div class="actions"><button id="submit-button" type="submit">Gửi tin nhắn</button>
+<button id="reset-button" type="button" class="secondary">Cuộc trò chuyện mới</button></div></form>
+</section>
+<footer>Nội dung do AI tạo có thể có sai sót. Lịch sử chỉ nằm trong bộ nhớ trang và mất khi tải lại. Tối đa 20 lượt hỏi, 32.000 ký tự mỗi cuộc trò chuyện.</footer>
+</main></body></html>

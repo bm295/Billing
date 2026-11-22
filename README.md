@@ -40,3 +40,23 @@ API routes và JSON contracts được giữ tương thích với bản C# trư�
 ## Collection queue position preview
 
 See [API and examples](docs/features/collection-queue-position-preview.md) for previewing an invoice position after proposed queue suffix reversals.
+
+## LLM invoice explanation
+
+## Direct LLM chat (no SQL Server)
+
+Start Ollama with `qwen3:8b` installed (`ollama pull qwen3:8b`), then run:
+
+```powershell
+mvn spring-boot:run "-Dspring-boot.run.profiles=chat"
+```
+
+Open http://localhost:8080/llm.html and send a message. The `chat` profile disables
+the database and billing components; it needs only Ollama. Conversation history is
+kept in page memory and cleared on reload. The default profile still runs Billing
+with SQL Server. Configure `BILLING_LLM_MODEL` to use another installed model.
+
+## Invoice explanation API
+
+Use Qwen3 through Ollama to explain existing invoices with
+`POST /invoices/{id}/explanation`. See [setup and examples](docs/features/invoice-explanation.md).
